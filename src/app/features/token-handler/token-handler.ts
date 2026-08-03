@@ -23,8 +23,8 @@ export class TokenHandlerComponent implements OnInit {
   private authService = inject(AuthService);
 
   ngOnInit(): void {
-    // Read the token from the path param token=:token
-    this.route.paramMap.subscribe(params => {
+    // Read the token from the query param ?token=xxx
+    this.route.queryParamMap.subscribe(params => {
       const token = params.get('token');
       if (token) {
         this.verifyToken(token);
