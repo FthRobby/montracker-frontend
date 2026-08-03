@@ -1,7 +1,18 @@
 import { Injectable, inject, signal } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { environment } from '../../environments/environment';
-import { Observable, tap, catchError, of } from 'rxjs';
+import { Observable, tap, catchError } from 'rxjs';
+import { jwtDecode } from 'jwt-decode';
+
+interface JwtPayload {
+  userChatId: string;
+  exp: number;
+  iat: number;
+}
+
+interface VerifyTokenResponse {
+  accessToken: string;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -13,32 +24,28 @@ export class AuthService {
   isAuthenticated = signal<boolean>(this.hasToken());
 
   private hasToken(): boolean {
-    return !!localStorage.getItem('auth_token');
+    const token = localStorage.getItem('auth_token');
+    if (!token) return false;
+
+    try {
+      const { exp } = jwtDecode<JwtPayload>(token);
+      return exp * 1000 > Date.now();
+    } catch {
+      return false;
+    }
   }
 
-  verifyToken(token: string): Observable<any> {
-    // We assume backend expects a GET request, but it could be POST.
-    // Let's use GET and pass the token as a query param or header.
-    // If backend uses /auth/verify, we might need a POST. Let's do POST just in case.
-    return this.http.post(`${environment.apiUrl}/auth/verify`, { token }).pipe(
-      tap((response: any) => {
-        // If successful, save token
-        localStorage.setItem('auth_token', token);
+  verifyToken(token: string): Observable<VerifyTokenResponse> {
+    return this.http.post<VerifyTokenResponse>(`${environment.apiUrl}/auth/verify`, { token }).pipe(
+      tap((response) => {
+        localStorage.setItem('auth_token', response.accessToken);
         this.isAuthenticated.set(true);
       }),
-      catchError(error => {
+      catchError((error) => {
         this.logout();
         throw error;
       })
     );
-    // TEMPORARY MOCK FOR TESTING
-    // return of({ success: true }).pipe(
-    //   tap(() => {
-    //     localStorage.setItem('auth_token', token);
-    //     this.isAuthenticated.set(true);
-    //   })
-    // );
-
   }
 
   logout(): void {
