@@ -23,6 +23,11 @@ export class TokenHandlerComponent implements OnInit {
   private authService = inject(AuthService);
 
   ngOnInit(): void {
+    if (this.authService.isAuthenticated()) {
+      this.router.navigate(['/dashboard'])
+      return
+    }
+
     // Read the token from the query param ?token=xxx
     this.route.queryParamMap.subscribe(params => {
       const token = params.get('token');
@@ -37,7 +42,6 @@ export class TokenHandlerComponent implements OnInit {
   private verifyToken(token: string): void {
     this.authService.verifyToken(token).subscribe({
       next: () => {
-        // Validation successful
         this.router.navigate(['/dashboard']);
       },
       error: (err) => {
