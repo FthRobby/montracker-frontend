@@ -3,7 +3,7 @@ import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-unauthorized',
-  imports: [RouterLink],
+  imports: [],
   template: `
     <div class="min-h-screen flex items-center justify-center bg-zinc-950 text-white">
       <div class="flex flex-col items-center justify-center p-8 text-center">

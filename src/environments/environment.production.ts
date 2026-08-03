@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'http://localhost:3000' // Change this for production
+  apiUrl: 'https://montracker-api-production.up.railway.app' // Change this for production
 };
